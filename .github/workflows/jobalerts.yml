@@ -1,0 +1,52 @@
+name: Daily job alerts
+
+"on":
+  schedule:
+    - cron: "30 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run pipeline
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          PROFILE_TEXT: ${{ secrets.PROFILE_TEXT }}
+        run: |
+          python job_collector.py
+          python job_filter.py
+          python run_alerts.py
+
+      - name: Persist seen_jobs.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet seen_jobs.json; then
+            echo "seen_jobs.json unchanged - nothing to commit."
+          else
+            git add seen_jobs.json
+            git commit -m "Update seen_jobs.json [skip ci]"
+            git push
+          fi
