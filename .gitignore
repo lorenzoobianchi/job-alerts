@@ -1,0 +1,43 @@
+# Secrets
+.env
+.env.*
+*.env
+
+# Personal profile
+profile.txt
+
+# Generated data
+all_jobs.csv
+filtered_jobs.csv
+ranked_jobs.csv
+
+# Logs
+jobalerts.log
+jobalerts.error.log
+*.log
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+
+# OS junk
+.DS_Store
+
+# Editor files
+.vscode/
+.idea/
+
+*.plist
+
+*.csv
+*.log
+*.plist
+program_calendar.py
+profile.txt
+.env
+.env.*
