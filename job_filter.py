@@ -198,6 +198,28 @@ def calculate_score(row):
         score += 15
         reasons.append("Relevant role in description")
 
+    # JUNIOR GATE. A "Product Manager" with no qualifier almost always means
+    # 2-4 years of experience even when the title doesn't say "Senior".
+    # Require an explicit junior signal in the title; otherwise the role is
+    # treated as too experienced for a new grad and dropped.
+    JUNIOR_SIGNALS = [
+        "junior", "jr", "associate", "graduate", "grad", "new grad",
+        "entry level", "entry-level", "intern", "internship", "trainee",
+        "apprentice", "apm", "early career", "rotational", "analyst",
+        "associate program", "ist year", "first year", "0-1 year",
+        "0-2 years", "1-2 years",
+    ]
+    has_junior_signal = (
+        contains_any(title, JUNIOR_SIGNALS)
+        or "graduate" in description
+        or "new grad" in description
+        or "entry level" in description.replace("-", " ")
+        or "no prior experience" in description
+        or "no experience required" in description
+    )
+    if not has_junior_signal:
+        return -100, "No junior signal in title or description (likely needs experience)"
+
     # Geography – weighted so Europe genuinely beats a US duplicate.
     # Amsterdam gets an extra bonus: it's the #1 target city and matches the
     # 30% tax ruling strategy.

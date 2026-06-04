@@ -60,9 +60,9 @@ MODEL = "claude-haiku-4-5-20251001"
 # Be polite to the API and stay well inside rate limits.
 DELAY_BETWEEN_CALLS = 0.4
 
-# How long a job description we send. Full descriptions waste tokens; the first
-# part almost always contains the role summary and requirements.
-MAX_DESCRIPTION_CHARS = 1500
+# How long a job description we send. We need enough room for the
+# "Requirements / Qualifications" section, which is often near the bottom.
+MAX_DESCRIPTION_CHARS = 3500
 
 
 # ----------------------------
@@ -119,26 +119,34 @@ Score the fit from 0 to 100, where:
 - 30-49: weak fit, probably not worth the effort
 - 0-29: poor fit or disqualifying mismatch (seniority, function, location, visa)
 
-PRIORITIES, in this exact order (this overrides anything in the profile text):
-1. COMPENSATION & COMPANY TIER. Top priority is high pay and prestigious \
-employers where the candidate can build a strong career: big tech (Google, \
-Meta, Microsoft, Amazon, Apple, Nvidia), top fintech/payments (Stripe, Adyen, \
-Wise, Revolut, Klarna), MBB consulting, top trading firms (Optiver, IMC, \
-Jane Street, Citadel, Flow Traders), top AI labs (OpenAI, Anthropic, Mistral), \
-unicorns and Series C/D scale-ups with strong funding (Databricks, Datadog, \
-MongoDB, Snowflake, Bending Spoons, Picnic, n8n, Parloa, Lovable, Synthesia, \
-ElevenLabs). Score these HIGH even if the role/function is just decent.
-2. ROLE & LEVEL. Junior/grad/analyst/associate/APM/PM new grad. Reject \
-senior, lead, principal, staff, director, head-of.
+THE CANDIDATE IS A NEW GRAD with ZERO professional product experience (one \
+6-month internship at Accenture). This is the most important constraint.
+
+HARD REJECTION RULES - these override everything else:
+- If the description mentions "2+ years", "3+ years", "5+ years", "X+ years \
+of experience", or any explicit experience requirement above 1 year: score \
+must be 25 or below.
+- If the description mentions "proven track record", "demonstrated experience \
+in product/strategy/operations", "previous PM experience required", or \
+similar: score must be 35 or below.
+- If the job is "Product Manager" without "Associate", "Junior", "APM", \
+"Graduate", "New Grad", or "Intern" in the title AND the description does not \
+explicitly say it's open to new grads: score must be 30 or below. (A plain \
+"Product Manager" at Stripe/Adyen/etc almost always means 3+ years even when \
+the title doesn't say "Senior".)
+- A great company name does NOT override an experience requirement. Stripe \
+asking for 3 years is still a NO for this candidate.
+
+ONLY AFTER passing the hard rules, consider these priorities in order:
+1. ROLE & LEVEL. Junior/grad/analyst/associate/APM/PM new grad/intern.
+2. COMPENSATION & COMPANY TIER. High pay, prestigious employer (big tech, \
+top fintech, MBB, top trading, top AI labs, well-funded scale-ups).
 3. FUNCTION. Product, strategy, operations, data, business analyst, \
 consulting. Avoid pure engineering, pure sales, support, HR, legal.
-4. LOCATION. Amsterdam is the #1 target city - give Amsterdam-based jobs an \
-explicit boost in the score. Other European hubs (London, Berlin, Dublin, \
-Paris, Zurich, Milan) are also preferred. A top-tier US/UK company can still \
-score high if the role is great, but never above an equivalent Amsterdam role.
-5. INDUSTRY INTEREST. Travel/mobility/logistics is a NICE-TO-HAVE bonus, NOT \
-a primary criterion. A high-paying fintech or AI role beats a mediocre travel \
-role every time.
+4. LOCATION. Amsterdam is the #1 target city. Other European hubs are \
+preferred. A top-tier US/UK role can still score well if the role itself is \
+genuinely entry-level.
+5. INDUSTRY INTEREST. Travel/mobility/logistics is a small bonus only.
 
 Respond with ONLY a JSON object, no other text, no markdown fences:
 {"score": <integer 0-100>, "reason": "<one short sentence>"}"""
